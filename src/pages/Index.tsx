@@ -17,14 +17,21 @@ export default function Index() {
   const handleQuestionnaireSubmit = async (data: QuestionnaireData) => {
     setIsLoading(true);
     try {
+      console.log('Submitting questionnaire data:', data);
+      
       const { data: response, error } = await supabase.functions.invoke('generate-projects', {
         body: { data }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Project generation error:', error);
+        throw error;
+      }
 
+      console.log('Generated projects:', response.projects);
       setProjects(response.projects);
       setShowQuestionnaire(false);
+      
       toast({
         title: "Success",
         description: "Projects generated successfully!",
@@ -68,14 +75,23 @@ export default function Index() {
             isLoading={isLoading}
           />
         ) : (
-          <div className="grid grid-cols-1 gap-6">
-            {projects.map((project) => (
-              <ProjectCard 
-                key={project.id} 
-                project={project}
-                onBack={handleBack}
-              />
-            ))}
+          <div className="space-y-6">
+            <Button 
+              onClick={handleBack}
+              variant="outline"
+              className="mb-4"
+            >
+              ← Back to Questionnaire
+            </Button>
+            <div className="grid grid-cols-1 gap-6">
+              {projects.map((project) => (
+                <ProjectCard 
+                  key={project.id} 
+                  project={project}
+                  onBack={handleBack}
+                />
+              ))}
+            </div>
           </div>
         )}
       </div>

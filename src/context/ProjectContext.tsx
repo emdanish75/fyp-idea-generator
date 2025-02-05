@@ -1,10 +1,35 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-interface Project {
+interface LearningResource {
+  title: string;
+  type: string;
+  url: string;
+}
+
+interface Roadmap {
+  overview: string;
+  problemStatement: string;
+  solutionApproach: string;
+  toolsAndTechnologies: string[];
+  expectedChallenges: string[];
+  learningResources: LearningResource[];
+}
+
+interface ResearchPaper {
+  title: string;
+  authors: string[];
+  year: number;
+  abstract: string;
+  url: string;
+}
+
+export interface Project {
   id: string;
   title: string;
   description: string;
   keywords: string[];
+  roadmap: Roadmap;
+  researchPapers: ResearchPaper[];
 }
 
 interface ProjectContextType {
