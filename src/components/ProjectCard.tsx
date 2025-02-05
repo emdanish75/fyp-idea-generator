@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface Project {
   id: string;
@@ -13,20 +14,23 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project }: ProjectCardProps) {
   return (
-    <div className="bg-dark-200 p-6 rounded-lg shadow-lg">
-      <h3 className="text-xl font-bold mb-2">{project.title}</h3>
-      <p className="text-gray-300 mb-4">{project.description}</p>
-      <div className="flex flex-wrap gap-2 mb-4">
+    <div className="glass-morphism p-6 rounded-lg space-y-4">
+      <h3 className="text-xl font-bold text-foreground">{project.title}</h3>
+      <p className="text-muted-foreground">{project.description}</p>
+      <div className="flex flex-wrap gap-2">
         {project.keywords.map((keyword, index) => (
-          <span
+          <Badge 
             key={index}
-            className="bg-blue-600 px-2 py-1 rounded-full text-sm"
+            variant="secondary"
+            className="bg-secondary/50"
           >
             {keyword}
-          </span>
+          </Badge>
         ))}
       </div>
-      <Button variant="default">Learn More</Button>
+      <Button variant="secondary" className="w-full">
+        Learn More
+      </Button>
     </div>
   );
 }

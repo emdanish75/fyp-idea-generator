@@ -15,16 +15,29 @@ export default function Index() {
   const handleQuestionnaireSubmit = async (data: QuestionnaireData) => {
     setIsLoading(true);
     try {
-      // Example API call to generate projects based on questionnaire data
-      const response = await fetch('/api/generate-projects', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      // Example project generation based on user input
+      const generatedProjects = [
+        {
+          id: '1',
+          title: `${data.major} Project Management System`,
+          description: `A comprehensive project management system tailored for ${data.major} students, incorporating ${data.technicalSkills} technologies.`,
+          keywords: data.interests.split(',').map(k => k.trim()),
         },
-        body: JSON.stringify(data),
-      });
-      const result = await response.json();
-      setProjects(result.projects);
+        {
+          id: '2',
+          title: `Smart ${data.major} Analytics Platform`,
+          description: `An analytics platform focusing on ${data.major} data analysis using ${data.technicalSkills}.`,
+          keywords: data.technicalSkills.split(',').map(k => k.trim()),
+        },
+        {
+          id: '3',
+          title: `${data.major} Learning Hub`,
+          description: `An interactive learning platform for ${data.major} students with ${data.projectScope} features.`,
+          keywords: [...data.interests.split(','), ...data.technicalSkills.split(',')].map(k => k.trim()),
+        }
+      ];
+
+      setProjects(generatedProjects);
       toast({
         title: "Success",
         description: "Projects generated successfully!",
@@ -45,13 +58,13 @@ export default function Index() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-100 text-white p-8">
+    <div className="min-h-screen bg-background text-foreground p-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">FYP Project Generator</h1>
           <div className="flex items-center gap-4">
-            <span>{user.email}</span>
-            <Button variant="outline" onClick={() => signOut()}>
+            <span className="text-muted-foreground">{user.email}</span>
+            <Button variant="secondary" onClick={() => signOut()}>
               Sign Out
             </Button>
           </div>
