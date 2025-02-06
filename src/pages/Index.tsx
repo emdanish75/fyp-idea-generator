@@ -61,7 +61,7 @@ export default function Index() {
     <div className="min-h-screen bg-background text-foreground p-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">FYP Project Generator</h1>
+          <h1 className="text-3xl font-bold">FYP Idea Generator</h1>
           <div className="flex items-center gap-4">
             <span className="text-muted-foreground">{user.email}</span>
             <Button variant="secondary" onClick={() => signOut()}>

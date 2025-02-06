@@ -6,16 +6,33 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from '@/components/ui/use-toast';
 
-const majors = [
+const fieldofstudy = [
   "Computer Science",
   "Software Engineering",
-  "Information Technology",
-  "Artificial Intelligence",
-  "Data Science",
   "Cybersecurity",
-  "Electrical Engineering",
   "Mechanical Engineering",
+  "Electrical Engineering",
+  "Aviation Management",
+  "Business Studies",
+  "Economics",
+  "Finance",
+  "Psychology",
+  "Sociology",
+  "Political Science",
+  "Physics",
+  "Chemistry",
+  "Biology",
+  "Mathematics",
+  "Environmental Science",
+  "Media and Communication",
+  "Education",
+  "Architecture",
+  "Art and Design",
+  "Music and Performing Arts",
+  "Law",
+  "Humanities"
 ];
+
 
 export interface QuestionnaireData {
   name: string;
@@ -24,7 +41,7 @@ export interface QuestionnaireData {
   semester: string;
   major: string;
   interests: string;
-  technicalSkills: string;
+  skills: string;
   problemSolvingStyle: string;
   preferredWorkStyle: string;
   projectScope: string;
@@ -43,7 +60,7 @@ export function Questionnaire({ onSubmit, isLoading }: QuestionnaireProps) {
     semester: '',
     major: '',
     interests: '',
-    technicalSkills: '',
+    skills: '',
     problemSolvingStyle: '',
     preferredWorkStyle: '',
     projectScope: ''
@@ -74,11 +91,11 @@ export function Questionnaire({ onSubmit, isLoading }: QuestionnaireProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-3xl mx-auto p-6 glass-morphism rounded-lg">
-      <div className="space-y-4">
+      <div className="space-y-5">
         <h2 className="text-2xl font-bold text-foreground mb-6">Basic Information</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
+          <div className="space-y-4">
             <Label htmlFor="name">Name</Label>
             <Input
               id="name"
@@ -89,7 +106,7 @@ export function Questionnaire({ onSubmit, isLoading }: QuestionnaireProps) {
             />
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-4">
             <Label htmlFor="age">Age</Label>
             <Input
               id="age"
@@ -103,7 +120,7 @@ export function Questionnaire({ onSubmit, isLoading }: QuestionnaireProps) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
+          <div className="space-y-4">
             <Label htmlFor="university">University</Label>
             <Input
               id="university"
@@ -114,7 +131,7 @@ export function Questionnaire({ onSubmit, isLoading }: QuestionnaireProps) {
             />
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-4">
             <Label htmlFor="semester">Semester</Label>
             <Input
               id="semester"
@@ -126,17 +143,17 @@ export function Questionnaire({ onSubmit, isLoading }: QuestionnaireProps) {
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="major">Major</Label>
+        <div className="space-y-4">
+          <Label htmlFor="major">Field of Study</Label>
           <Select 
             value={formData.major}
             onValueChange={(value) => setFormData({ ...formData, major: value })}
           >
             <SelectTrigger className="bg-secondary/50 border-secondary">
-              <SelectValue placeholder="Select your major" />
+              <SelectValue placeholder="Select your field of study" />
             </SelectTrigger>
             <SelectContent>
-              {majors.map((major) => (
+              {fieldofstudy.map((major) => (
                 <SelectItem key={major} value={major}>
                   {major}
                 </SelectItem>
@@ -147,64 +164,64 @@ export function Questionnaire({ onSubmit, isLoading }: QuestionnaireProps) {
 
         <h2 className="text-2xl font-bold text-foreground mt-8 mb-6">Skills & Interests</h2>
 
-        <div className="space-y-2">
-          <Label htmlFor="technicalSkills">Technical Skills</Label>
+        <div className="space-y-4">
+          <Label htmlFor="technicalSkills">Skills</Label>
           <Textarea
             id="technicalSkills"
-            value={formData.technicalSkills}
-            onChange={(e) => setFormData({ ...formData, technicalSkills: e.target.value })}
+            value={formData.skills}
+            onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
             className="bg-secondary/50 border-secondary min-h-[100px]"
-            placeholder="List your technical skills (e.g., programming languages, tools, frameworks)"
+            placeholder="List your key skills and expertise areas. Examples: Python, data analysis, UI/UX design, business strategy, 3D modeling, chemistry research, digital marketing, embedded systems, psychology studies, etc."
             required
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-4">
           <Label htmlFor="interests">Interests</Label>
           <Textarea
             id="interests"
             value={formData.interests}
             onChange={(e) => setFormData({ ...formData, interests: e.target.value })}
-            className="bg-secondary/50 border-secondary min-h-[100px]"
-            placeholder="What areas of technology interest you the most?"
+            className="bg-secondary/50 border-secondary min-h-[150px]"
+            placeholder="Describe your areas of interest. Examples: Artificial Intelligence, cybersecurity, fintech, renewable energy, psychology and human behavior, robotics, healthcare innovation, e-commerce, space exploration, game development, environmental science, etc."
             required
           />
         </div>
 
         <h2 className="text-2xl font-bold text-foreground mt-8 mb-6">Work Style</h2>
 
-        <div className="space-y-2">
+        <div className="space-y-4">
           <Label htmlFor="problemSolvingStyle">Problem-Solving Approach</Label>
           <Textarea
             id="problemSolvingStyle"
             value={formData.problemSolvingStyle}
             onChange={(e) => setFormData({ ...formData, problemSolvingStyle: e.target.value })}
-            className="bg-secondary/50 border-secondary min-h-[100px]"
-            placeholder="How do you typically approach complex problems?"
+            className="bg-secondary/50 border-secondary min-h-[150px]"
+            placeholder="Describe how you tackle complex problems. Examples: Breaking them into smaller steps, using data-driven analysis, brainstorming creative solutions, applying logical reasoning, experimenting with different approaches, collaborating with others, leveraging technology, etc. Example: 'I first break the problem into smaller parts, research possible solutions, and then test different approaches systematically to find the most efficient one.'"
             required
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-4">
           <Label htmlFor="preferredWorkStyle">Preferred Work Style</Label>
           <Textarea
             id="preferredWorkStyle"
             value={formData.preferredWorkStyle}
             onChange={(e) => setFormData({ ...formData, preferredWorkStyle: e.target.value })}
-            className="bg-secondary/50 border-secondary min-h-[100px]"
-            placeholder="Do you prefer working independently or in teams? Theory or practical implementation?"
+            className="bg-secondary/50 border-secondary min-h-[150px]"
+            placeholder="Describe your preferred work style. Examples: Working independently, collaborating in teams, leading projects, hands-on practical work, theoretical research, structured planning, flexible problem-solving, etc. Example: 'I enjoy working in teams where I can brainstorm ideas, but I prefer structured tasks with clear deadlines to stay productive.'"
             required
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-4">
           <Label htmlFor="projectScope">Desired Project Scope</Label>
           <Textarea
             id="projectScope"
             value={formData.projectScope}
             onChange={(e) => setFormData({ ...formData, projectScope: e.target.value })}
-            className="bg-secondary/50 border-secondary min-h-[100px]"
-            placeholder="What kind of impact do you want your project to have?"
+            className="bg-secondary/50 border-secondary min-h-[150px]"
+            placeholder="What kind of impact do you want your project to have? Examples: Solving real-world problems, innovating in a specific industry, improving efficiency, raising awareness, benefiting a local community, advancing research, or building a scalable business solution. Example: 'I want to create a project that helps small businesses automate their workflows, saving them time and resources.'"
             required
           />
         </div>

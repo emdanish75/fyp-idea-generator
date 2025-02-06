@@ -61,7 +61,7 @@ serve(async (req) => {
     const { data: userProfile } = await req.json();
     console.log('Received user profile:', userProfile);
 
-    const initialPrompt = `Analyze this student profile and generate 3 project ideas:
+    const initialPrompt = `Analyze this student profile and generate 3 personalized project/thesis ideas based on their preferences and field of study:
     Name: ${userProfile.name}
     Major: ${userProfile.major}
     Semester: ${userProfile.semester}
@@ -71,16 +71,26 @@ serve(async (req) => {
     Work Style: ${userProfile.preferredWorkStyle}
     Project Scope: ${userProfile.projectScope}
 
+    Ensure the ideas are:
+    - Unique, with potential to solve a real-world problem or fill an existing market gap.
+    - Of medium difficulty to implement.
+    - Have the potential to make money or create value in a practical way.
+    - Not outdated or oversaturated with competition.
+    - Relevant to the student's specific major and interests.
+    - Not too broad or narrow; ensure they are feasible and aligned with the student's capabilities.
+    - If the student is in a field more focused on research (e.g., Humanities, Social Sciences), suggest thesis ideas rather than projects. Ensure the ideas are research-driven and innovative.
+    
     Generate a response in this exact JSON format:
     {
       "ideas": [
         {
-          "title": "Project Title",
-          "description": "Brief project description",
-          "keywords": ["keyword1", "keyword2", "keyword3"]
+          "title": "Project/Thesis Title",
+          "description": "Brief description of the project or thesis idea, highlighting its uniqueness, potential impact, and how it addresses a real-world problem or market gap.",
+          "keywords": ["keyword1", "keyword2", "keyword3"],
         }
       ]
     }`;
+
 
     const mistralResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
       method: 'POST',
@@ -179,7 +189,8 @@ serve(async (req) => {
               }
             ]
           }
-        }`;
+        }
+        Don't use placeholder links like 'example.com' etc. Strictly follow the output format mentioned above.`;
 
         const roadmapResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
           method: 'POST',
