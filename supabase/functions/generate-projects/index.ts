@@ -29,6 +29,10 @@ interface ProjectIdea {
   technicalRequirements: string[];
 }
 
+interface ProjectIdeasResponse {
+  ideas: ProjectIdea[];
+}
+
 interface ResearchPaper {
   title: string;
   authors: string[];
@@ -50,7 +54,12 @@ interface ProjectRoadmap {
   }[];
 }
 
+interface RoadmapResponse {
+  roadmap: ProjectRoadmap;
+}
+
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -59,7 +68,7 @@ serve(async (req) => {
     const { data: userProfile } = await req.json();
     console.log('Received user profile:', userProfile);
 
-    // Step 1: Initial Mistral API call for psychometric analysis and project ideas
+    // Step 1: Generate initial project ideas using Mistral AI
     const initialPrompt = `Analyze this student profile and generate 3 project ideas:
     Name: ${userProfile.name}
     Major: ${userProfile.major}
@@ -96,6 +105,12 @@ serve(async (req) => {
       }),
     });
 
+    if (!mistralResponse.ok) {
+      const errorText = await mistralResponse.text();
+      console.error('Mistral API error:', errorText);
+      throw new Error(`Mistral API error: ${errorText}`);
+    }
+
     const mistralData = await mistralResponse.json();
     console.log('Mistral API response:', mistralData);
 
@@ -103,7 +118,7 @@ serve(async (req) => {
       throw new Error('Invalid response from Mistral API');
     }
 
-    const parsedIdeas = JSON.parse(mistralData.choices[0].message.content);
+    const parsedIdeas: ProjectIdeasResponse = JSON.parse(mistralData.choices[0].message.content);
     console.log('Parsed ideas:', parsedIdeas);
 
     if (!parsedIdeas.ideas || !Array.isArray(parsedIdeas.ideas)) {
@@ -114,14 +129,21 @@ serve(async (req) => {
     const projects = await Promise.all(parsedIdeas.ideas.map(async (idea: ProjectIdea) => {
       // Search for related papers using CORE API
       console.log('Searching papers for keywords:', idea.keywords);
+      const searchQuery = idea.keywords.join(' OR ');
       const coreResponse = await fetch(
-        `https://api.core.ac.uk/v3/search/works?q=${encodeURIComponent(idea.keywords.join(' OR '))}&limit=3`,
+        `https://api.core.ac.uk/v3/search/works?q=${encodeURIComponent(searchQuery)}&limit=3&year_from=${new Date().getFullYear() - 5}`,
         {
           headers: {
             'Authorization': `Bearer ${coreApiKey}`,
           },
         }
       );
+
+      if (!coreResponse.ok) {
+        const errorText = await coreResponse.text();
+        console.error('CORE API error:', errorText);
+        throw new Error(`CORE API error: ${errorText}`);
+      }
 
       const coreData = await coreResponse.json();
       console.log('CORE API response:', coreData);
@@ -134,7 +156,7 @@ serve(async (req) => {
         url: paper.downloadUrl || (paper.doi ? `https://doi.org/${paper.doi}` : ''),
       }));
 
-      // Step 3: Generate detailed roadmap with Mistral API using project idea and research papers
+      // Step 3: Generate detailed roadmap with Mistral AI
       const roadmapPrompt = `Create a detailed project roadmap for:
       Title: ${idea.title}
       Description: ${idea.description}
@@ -174,6 +196,12 @@ serve(async (req) => {
         }),
       });
 
+      if (!roadmapResponse.ok) {
+        const errorText = await roadmapResponse.text();
+        console.error('Mistral API error (roadmap):', errorText);
+        throw new Error(`Mistral API error (roadmap): ${errorText}`);
+      }
+
       const roadmapData = await roadmapResponse.json();
       console.log('Roadmap API response:', roadmapData);
 
@@ -181,7 +209,7 @@ serve(async (req) => {
         throw new Error('Invalid roadmap response from Mistral API');
       }
 
-      const parsedRoadmap = JSON.parse(roadmapData.choices[0].message.content);
+      const parsedRoadmap: RoadmapResponse = JSON.parse(roadmapData.choices[0].message.content);
       console.log('Parsed roadmap:', parsedRoadmap);
 
       if (!parsedRoadmap.roadmap) {
