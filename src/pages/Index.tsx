@@ -1,12 +1,13 @@
 import { useAuth } from '@/context/AuthContext';
 import Auth from '@/components/Auth';
 import { Questionnaire, QuestionnaireData } from '@/components/Questionnaire';
-import { ProjectCard } from '@/components/ProjectCard';
 import { useProjects } from '@/context/ProjectContext';
 import { useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { supabase } from "@/integrations/supabase/client";
+import { LoadingScreen } from '@/components/LoadingScreen';
+import { ProjectList } from '@/components/ProjectList';
 
 export default function Index() {
   const { user, signOut } = useAuth();
@@ -69,6 +70,8 @@ export default function Index() {
           </div>
         </div>
 
+        {isLoading && <LoadingScreen />}
+
         {showQuestionnaire ? (
           <Questionnaire
             onSubmit={handleQuestionnaireSubmit}
@@ -81,17 +84,9 @@ export default function Index() {
               variant="outline"
               className="mb-4"
             >
-              ← Back to Questionnaire
+              ← Generate New Ideas
             </Button>
-            <div className="grid grid-cols-1 gap-6">
-              {projects.map((project) => (
-                <ProjectCard 
-                  key={project.id} 
-                  project={project}
-                  onBack={handleBack}
-                />
-              ))}
-            </div>
+            <ProjectList projects={projects} />
           </div>
         )}
       </div>

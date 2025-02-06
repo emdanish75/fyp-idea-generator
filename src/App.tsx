@@ -7,6 +7,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ProjectProvider } from "@/context/ProjectContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import ProjectDetails from "./pages/ProjectDetails";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/project/:id" element={<ProjectDetails />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
