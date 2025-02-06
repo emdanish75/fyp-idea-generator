@@ -40,6 +40,7 @@ serve(async (req) => {
 
   try {
     const { data } = await req.json()
+    console.log('Received data:', data)
 
     // Initialize Mistral client
     const mistralApiKey = Deno.env.get('MISTRAL_API_KEY')
@@ -57,8 +58,20 @@ serve(async (req) => {
     - Work Style: ${data.preferredWorkStyle}
     - Desired Impact: ${data.projectScope}
     
-    Return the response in JSON format with title, keywords, brief_description, technical_requirements, and learning_outcomes for each idea.`
+    Return the response in JSON format with the following structure:
+    {
+      "ideas": [
+        {
+          "title": "Project Title",
+          "keywords": ["keyword1", "keyword2"],
+          "brief_description": "Project description",
+          "technical_requirements": ["requirement1", "requirement2"],
+          "learning_outcomes": ["outcome1", "outcome2"]
+        }
+      ]
+    }`
 
+    console.log('Sending request to Mistral API...')
     const mistralResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -74,18 +87,45 @@ serve(async (req) => {
     })
 
     const mistralData = await mistralResponse.json()
-    const ideas = JSON.parse(mistralData.choices[0].message.content).ideas
+    console.log('Mistral API response:', mistralData)
+
+    if (!mistralData.choices?.[0]?.message?.content) {
+      throw new Error('Invalid response from Mistral API')
+    }
+
+    const parsedIdeas = JSON.parse(mistralData.choices[0].message.content)
+    console.log('Parsed ideas:', parsedIdeas)
+
+    if (!parsedIdeas.ideas || !Array.isArray(parsedIdeas.ideas)) {
+      throw new Error('Invalid ideas format in Mistral response')
+    }
 
     // Process each idea with CORE API and generate roadmaps
     const projects: Project[] = await Promise.all(
-      ideas.map(async (idea: any, index: number) => {
+      parsedIdeas.ideas.map(async (idea: any, index: number) => {
         // Generate roadmap
         const roadmapPrompt = `Create a detailed project roadmap for:
         Title: ${idea.title}
         Description: ${idea.brief_description}
         Technical Requirements: ${idea.technical_requirements.join(', ')}
         
-        Return a JSON object with overview, problemStatement, solutionApproach, toolsAndTechnologies, expectedChallenges, and learningResources.`
+        Return a JSON object with the following structure:
+        {
+          "roadmap": {
+            "overview": "Project overview",
+            "problemStatement": "Problem statement",
+            "solutionApproach": "Solution approach",
+            "toolsAndTechnologies": ["tool1", "tool2"],
+            "expectedChallenges": ["challenge1", "challenge2"],
+            "learningResources": [
+              {
+                "title": "Resource title",
+                "type": "video|article|tutorial",
+                "url": "https://example.com"
+              }
+            ]
+          }
+        }`
 
         const roadmapResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
           method: 'POST',
@@ -102,17 +142,38 @@ serve(async (req) => {
         })
 
         const roadmapData = await roadmapResponse.json()
-        const roadmap = JSON.parse(roadmapData.choices[0].message.content)
+        console.log('Roadmap response:', roadmapData)
+
+        if (!roadmapData.choices?.[0]?.message?.content) {
+          throw new Error('Invalid roadmap response from Mistral API')
+        }
+
+        const parsedRoadmap = JSON.parse(roadmapData.choices[0].message.content)
+        console.log('Parsed roadmap:', parsedRoadmap)
+
+        if (!parsedRoadmap.roadmap) {
+          throw new Error('Invalid roadmap format in Mistral response')
+        }
 
         // Fetch related research papers
         const coreApiKey = Deno.env.get('CORE_API_KEY')
-        const coreResponse = await fetch(`https://api.core.ac.uk/v3/search/works?q=${encodeURIComponent(idea.keywords.join(' OR '))}&limit=3`, {
-          headers: {
-            'Authorization': `Bearer ${coreApiKey}`,
-          },
-        })
+        if (!coreApiKey) {
+          throw new Error('Missing CORE API key')
+        }
+
+        console.log('Fetching research papers for keywords:', idea.keywords)
+        const coreResponse = await fetch(
+          `https://api.core.ac.uk/v3/search/works?q=${encodeURIComponent(idea.keywords.join(' OR '))}&limit=3`,
+          {
+            headers: {
+              'Authorization': `Bearer ${coreApiKey}`,
+            },
+          }
+        )
 
         const coreData = await coreResponse.json()
+        console.log('CORE API response:', coreData)
+
         const researchPapers: ResearchPaper[] = coreData.results.map((paper: any) => ({
           title: paper.title || 'Untitled',
           authors: paper.authors?.map((a: any) => a.name) || [],
@@ -126,11 +187,13 @@ serve(async (req) => {
           title: idea.title,
           description: idea.brief_description,
           keywords: idea.keywords,
-          roadmap,
+          roadmap: parsedRoadmap.roadmap,
           researchPapers,
         }
       })
     )
+
+    console.log('Final projects:', projects)
 
     return new Response(
       JSON.stringify({ projects }),
@@ -142,7 +205,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        stack: error.stack 
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
