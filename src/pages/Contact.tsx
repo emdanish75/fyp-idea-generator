@@ -3,13 +3,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/components/ui/use-toast";
-import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
+import { Send, Star, MessageSquare, Heart } from "lucide-react";
 
 export default function Contact() {
-  const { user } = useAuth();
   const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" });
   const [reviewForm, setReviewForm] = useState({ name: "", rating: "", review: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,16 +17,15 @@ export default function Contact() {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
-        .from('contact_messages')
-        .insert([
-          { 
-            user_id: user?.id,
-            ...contactForm
-          }
-        ]);
+      const response = await fetch("https://formspree.io/f/xgvozzky", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(contactForm),
+      });
 
-      if (error) throw error;
+      if (!response.ok) throw new Error("Failed to send message");
 
       toast({
         title: "Message received",
@@ -52,18 +49,15 @@ export default function Contact() {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
-        .from('reviews')
-        .insert([
-          { 
-            user_id: user?.id,
-            name: reviewForm.name,
-            rating: parseInt(reviewForm.rating),
-            review: reviewForm.review
-          }
-        ]);
+      const response = await fetch("https://formspree.io/f/xpwqlldl", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(reviewForm),
+      });
 
-      if (error) throw error;
+      if (!response.ok) throw new Error("Failed to submit review");
 
       toast({
         title: "Thank you!",
@@ -110,7 +104,10 @@ export default function Contact() {
             transition={{ delay: 0.3 }}
             className="glass-morphism p-6 rounded-lg"
           >
-            <h2 className="text-2xl font-semibold mb-6">Send a Message</h2>
+            <div className="flex items-center gap-2 mb-6">
+              <MessageSquare className="text-blue-400 animate-pulse" />
+              <h2 className="text-2xl font-semibold">Send a Message</h2>
+            </div>
             <form onSubmit={handleContactSubmit} className="space-y-4">
               <div>
                 <Input
@@ -139,6 +136,7 @@ export default function Contact() {
                 />
               </div>
               <Button type="submit" disabled={isSubmitting} className="w-full">
+                <Send className="mr-2 h-4 w-4" />
                 Send Message
               </Button>
             </form>
@@ -151,7 +149,10 @@ export default function Contact() {
             transition={{ delay: 0.4 }}
             className="glass-morphism p-6 rounded-lg"
           >
-            <h2 className="text-2xl font-semibold mb-6">Leave a Review</h2>
+            <div className="flex items-center gap-2 mb-6">
+              <Star className="text-yellow-400 animate-pulse" />
+              <h2 className="text-2xl font-semibold">Leave a Review</h2>
+            </div>
             <form onSubmit={handleReviewSubmit} className="space-y-4">
               <div>
                 <Input
@@ -182,6 +183,7 @@ export default function Contact() {
                 />
               </div>
               <Button type="submit" disabled={isSubmitting} className="w-full">
+                <Heart className="mr-2 h-4 w-4" />
                 Submit Review
               </Button>
             </form>

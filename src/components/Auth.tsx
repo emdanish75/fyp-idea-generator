@@ -20,7 +20,7 @@ export default function Auth() {
     e.preventDefault();
     try {
       if (isSignUp) {
-        const { error: signUpError } = await signUp(email, password);
+        const { data, error: signUpError } = await signUp(email, password);
         if (signUpError) throw signUpError;
 
         // Create profile
@@ -28,7 +28,7 @@ export default function Auth() {
           .from('profiles')
           .insert([
             {
-              id: (await supabase.auth.getUser()).data.user?.id,
+              id: data.user?.id,
               name,
               age: parseInt(age),
             }
@@ -47,7 +47,7 @@ export default function Auth() {
           title: "Success",
           description: "Successfully signed in",
         });
-        navigate('/');
+        navigate('/landing');
       }
     } catch (error: any) {
       toast({
