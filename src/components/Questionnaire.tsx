@@ -6,36 +6,7 @@ import { BasicInformation } from './questionnaire/BasicInformation';
 import { SkillsAndInterests } from './questionnaire/SkillsAndInterests';
 import { WorkStyle } from './questionnaire/WorkStyle';
 
-const fieldofstudy = [
-  "Computer Science",
-  "Software Engineering",
-  "Cybersecurity",
-  "Mechanical Engineering",
-  "Electrical Engineering",
-  "Aviation Management",
-  "Business Studies",
-  "Economics",
-  "Finance",
-  "Psychology",
-  "Sociology",
-  "Political Science",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "Mathematics",
-  "Environmental Science",
-  "Media and Communication",
-  "Education",
-  "Architecture",
-  "Art and Design",
-  "Music and Performing Arts",
-  "Law",
-  "Humanities"
-];
-
 export interface QuestionnaireData {
-  name: string;
-  age: string;
   university: string;
   semester: string;
   major: string;
@@ -53,8 +24,6 @@ interface QuestionnaireProps {
 
 export function Questionnaire({ onSubmit, isLoading }: QuestionnaireProps) {
   const [formData, setFormData] = useState<Partial<QuestionnaireData>>({
-    name: '',
-    age: '',
     university: '',
     semester: '',
     major: '',
@@ -89,30 +58,62 @@ export function Questionnaire({ onSubmit, isLoading }: QuestionnaireProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-3xl mx-auto p-6 glass-morphism rounded-lg">
-      <BasicInformation 
-        formData={formData} 
-        setFormData={setFormData}
-        fieldofstudy={fieldofstudy}
-      />
-      
-      <SkillsAndInterests 
-        formData={formData} 
-        setFormData={setFormData}
-      />
-      
-      <WorkStyle 
-        formData={formData} 
-        setFormData={setFormData}
-      />
+    <div className="min-h-screen bg-background pt-20">
+      <h1 className="text-4xl font-bold text-center mb-12 bg-gradient-to-r from-primary via-purple-500 to-pink-500 text-transparent bg-clip-text">
+        FYP Idea Generator
+      </h1>
+      <form onSubmit={handleSubmit} className="space-y-8 w-full max-w-3xl mx-auto p-6 glass-morphism rounded-lg">
+        <BasicInformation 
+          formData={formData} 
+          setFormData={setFormData}
+          fieldofstudy={fieldofstudy}
+        />
+        
+        <SkillsAndInterests 
+          formData={formData} 
+          setFormData={setFormData}
+        />
+        
+        <WorkStyle 
+          formData={formData} 
+          setFormData={setFormData}
+        />
 
-      <Button 
-        type="submit" 
-        disabled={isLoading}
-        className="w-full"
-      >
-        {isLoading ? 'Generating Ideas...' : 'Generate Project Ideas'}
-      </Button>
-    </form>
+        <Button 
+          type="submit" 
+          disabled={isLoading}
+          className="w-full mt-8"
+        >
+          {isLoading ? 'Generating Ideas...' : 'Generate Project Ideas'}
+        </Button>
+      </form>
+    </div>
   );
 }
+
+const fieldofstudy = [
+  "Computer Science",
+  "Software Engineering",
+  "Cybersecurity",
+  "Mechanical Engineering",
+  "Electrical Engineering",
+  "Aviation Management",
+  "Business Studies",
+  "Economics",
+  "Finance",
+  "Psychology",
+  "Sociology",
+  "Political Science",
+  "Physics",
+  "Chemistry",
+  "Biology",
+  "Mathematics",
+  "Environmental Science",
+  "Media and Communication",
+  "Education",
+  "Architecture",
+  "Art and Design",
+  "Music and Performing Arts",
+  "Law",
+  "Humanities"
+];

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -20,15 +19,20 @@ export default function Auth() {
     e.preventDefault();
     try {
       if (isSignUp) {
-        const { data, error: signUpError } = await signUp(email, password);
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+        
         if (signUpError) throw signUpError;
+        if (!signUpData.user) throw new Error('No user data returned');
 
         // Create profile
         const { error: profileError } = await supabase
           .from('profiles')
           .insert([
             {
-              id: data.user?.id,
+              id: signUpData.user.id,
               name,
               age: parseInt(age),
             }
@@ -38,7 +42,7 @@ export default function Auth() {
 
         toast({
           title: "Success",
-          description: "Account created successfully! Please sign in.",
+          description: "Please check your email to confirm your account, then sign in.",
         });
         setIsSignUp(false);
       } else {

@@ -1,3 +1,4 @@
+
 import { useAuth } from '@/context/AuthContext';
 import Auth from '@/components/Auth';
 import { Questionnaire, QuestionnaireData } from '@/components/Questionnaire';
@@ -10,7 +11,7 @@ import { LoadingScreen } from '@/components/LoadingScreen';
 import { ProjectList } from '@/components/ProjectList';
 
 export default function Index() {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const { projects, setProjects } = useProjects();
   const [showQuestionnaire, setShowQuestionnaire] = useState(true);
@@ -58,38 +59,26 @@ export default function Index() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">FYP Idea Generator</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-muted-foreground">{user.email}</span>
-            <Button variant="secondary" onClick={() => signOut()}>
-              Sign Out
-            </Button>
-          </div>
+    <div className="min-h-screen bg-background">
+      {isLoading && <LoadingScreen />}
+
+      {showQuestionnaire ? (
+        <Questionnaire
+          onSubmit={handleQuestionnaireSubmit}
+          isLoading={isLoading}
+        />
+      ) : (
+        <div className="space-y-6 p-8">
+          <Button 
+            onClick={handleBack}
+            variant="outline"
+            className="mb-4"
+          >
+            ← Generate New Ideas
+          </Button>
+          <ProjectList projects={projects} />
         </div>
-
-        {isLoading && <LoadingScreen />}
-
-        {showQuestionnaire ? (
-          <Questionnaire
-            onSubmit={handleQuestionnaireSubmit}
-            isLoading={isLoading}
-          />
-        ) : (
-          <div className="space-y-6">
-            <Button 
-              onClick={handleBack}
-              variant="outline"
-              className="mb-4"
-            >
-              ← Generate New Ideas
-            </Button>
-            <ProjectList projects={projects} />
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }

@@ -12,35 +12,10 @@ interface BasicInformationProps {
 
 export function BasicInformation({ formData, setFormData, fieldofstudy }: BasicInformationProps) {
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <h2 className="text-2xl font-bold text-foreground mb-6">Basic Information</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-4">
-          <Label htmlFor="name">Name</Label>
-          <Input
-            id="name"
-            value={formData.name || ''}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="bg-secondary/50 border-secondary"
-            required
-          />
-        </div>
-        
-        <div className="space-y-4">
-          <Label htmlFor="age">Age</Label>
-          <Input
-            id="age"
-            type="number"
-            value={formData.age || ''}
-            onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-            className="bg-secondary/50 border-secondary"
-            required
-          />
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <Label htmlFor="university">University</Label>
           <Input
