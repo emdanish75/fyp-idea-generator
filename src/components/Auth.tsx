@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -9,10 +10,8 @@ import { useNavigate } from 'react-router-dom';
 export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [age, setAge] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,20 +24,18 @@ export default function Auth() {
         });
         
         if (signUpError) throw signUpError;
-        if (!signUpData.user) throw new Error('No user data returned');
+        
+        // Create profile on successful signup
+        if (signUpData.user) {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert([{ id: signUpData.user.id }]);
 
-        // Create profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([
-            {
-              id: signUpData.user.id,
-              name,
-              age: parseInt(age),
-            }
-          ]);
-
-        if (profileError) throw profileError;
+          if (profileError) {
+            console.error('Profile creation error:', profileError);
+            // Don't throw the error as the signup was successful
+          }
+        }
 
         toast({
           title: "Success",
@@ -69,31 +66,6 @@ export default function Auth() {
           {isSignUp ? 'Create Account' : 'Sign In'}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {isSignUp && (
-            <>
-              <div>
-                <Input
-                  placeholder="Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required={isSignUp}
-                  className="w-full"
-                />
-              </div>
-              <div>
-                <Input
-                  type="number"
-                  placeholder="Age"
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
-                  required={isSignUp}
-                  min="13"
-                  max="100"
-                  className="w-full"
-                />
-              </div>
-            </>
-          )}
           <div>
             <Input
               type="email"
