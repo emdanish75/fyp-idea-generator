@@ -1,39 +1,9 @@
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-interface LearningResource {
-  title: string;
-  type: string;
-  url: string;
-}
-
-interface Roadmap {
-  overview: string;
-  problemStatement: string;
-  solutionApproach: string;
-  toolsAndTechnologies: string[];
-  expectedChallenges: string[];
-  learningResources: LearningResource[];
-}
-
-interface ResearchPaper {
-  title: string;
-  authors: string[];
-  year: number;
-  abstract: string;
-  url: string;
-}
-
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  keywords: string[];
-  roadmap: Roadmap;
-  researchPapers: ResearchPaper[];
-}
+import { Project } from '@/context/ProjectContext';
 
 interface ProjectCardProps {
   project: Project;

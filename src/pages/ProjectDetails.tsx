@@ -1,13 +1,30 @@
+
 import { useNavigate, useParams } from 'react-router-dom';
 import { ProjectCard } from '@/components/ProjectCard';
 import { useProjects } from '@/context/ProjectContext';
+import { useEffect } from 'react';
+import { toast } from '@/components/ui/use-toast';
 
 export default function ProjectDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { projects } = useProjects();
+  const { projects, fetchUserProjects } = useProjects();
   
   const project = projects.find(p => p.id === id);
+
+  useEffect(() => {
+    // Fetch projects if they're not loaded
+    if (projects.length === 0) {
+      fetchUserProjects().catch((error) => {
+        console.error('Error fetching projects:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load project details",
+          variant: "destructive",
+        });
+      });
+    }
+  }, []);
 
   if (!project) {
     return (

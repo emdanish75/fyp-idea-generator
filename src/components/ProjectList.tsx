@@ -1,15 +1,8 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  roadmap: {
-    overview: string;
-  };
-}
+import { Project } from "@/context/ProjectContext";
 
 interface ProjectListProps {
   projects: Project[];

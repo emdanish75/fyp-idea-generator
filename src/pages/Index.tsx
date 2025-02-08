@@ -13,7 +13,7 @@ import { ProjectList } from '@/components/ProjectList';
 export default function Index() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const { projects, setProjects } = useProjects();
+  const { projects, setProjects, saveProjectsToDatabase } = useProjects();
   const [showQuestionnaire, setShowQuestionnaire] = useState(true);
 
   const handleQuestionnaireSubmit = async (data: QuestionnaireData) => {
@@ -31,12 +31,16 @@ export default function Index() {
       }
 
       console.log('Generated projects:', response.projects);
+      
+      // Save projects to state and database
       setProjects(response.projects);
+      await saveProjectsToDatabase(response.projects);
+      
       setShowQuestionnaire(false);
       
       toast({
         title: "Success",
-        description: "Projects generated successfully!",
+        description: "Projects generated and saved successfully!",
       });
     } catch (error: any) {
       console.error('Project generation error:', error);
