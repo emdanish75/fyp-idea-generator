@@ -43,7 +43,7 @@ export default function Index() {
         description: project.description,
         keywords: project.keywords,
         roadmap: project.roadmap,
-        research_papers: project.researchPapers || [],
+        research_papers: project.research_papers,
         user_id: user?.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
