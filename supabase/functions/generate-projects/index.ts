@@ -146,111 +146,168 @@ serve(async (req) => {
         // Search for related papers using CORE API
         console.log('Searching papers for keywords:', idea.keywords);
         const searchQuery = idea.keywords.join(' OR ');
-        const coreResponse = await fetch(
-          `https://api.core.ac.uk/v3/search/works?q=${encodeURIComponent(searchQuery)}&limit=3&year_from=${new Date().getFullYear() - 5}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${coreApiKey}`,
-            },
-          }
-        );
-
-        if (!coreResponse.ok) {
-          console.error(`CORE API error for idea "${idea.title}":`, await coreResponse.text());
-          continue; // Skip this idea but continue with others
-        }
-
-        const coreData = await coreResponse.json();
-        console.log('CORE API response:', coreData);
-
-        const relatedPapers: ResearchPaper[] = coreData.results.map((paper: any) => ({
-          title: paper.title,
-          authors: paper.authors?.map((author: any) => author.name) || [],
-          year: paper.yearPublished || new Date().getFullYear(),
-          abstract: paper.abstract || 'Abstract not available',
-          url: paper.downloadUrl || (paper.doi ? `https://doi.org/${paper.doi}` : ''),
-        }));
-
-        // Generate detailed roadmap with Mistral AI
-        const roadmapPrompt = `Create a detailed project roadmap for:
-        Title: ${idea.title}
-        Description: ${idea.description}
-        Keywords: ${idea.keywords.join(', ')}
-        Related Research:
-        ${relatedPapers.map(paper => `- ${paper.title} (${paper.year})`).join('\n')}
-
-        Provide a response in this exact JSON format:
-        {
-          "roadmap": {
-            "overview": "Project overview text",
-            "problemStatement": "Problem statement text",
-            "solutionApproach": "Solution approach text",
-            "toolsAndTechnologies": ["tool1", "tool2"],
-            "expectedChallenges": ["challenge1", "challenge2"],
-            "learningResources": [
-              {
-                "title": "Resource title",
-                "type": "documentation|tutorial|course",
-                "url": "https://example.com"
-              }
-            ]
-          }
-        }
-        Don't use placeholder links like 'example.com' etc. Strictly follow the output format mentioned above.`;
-
-        const roadmapResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${mistralApiKey}`,
-          },
-          body: JSON.stringify({
-            model: 'mistral-medium',
-            messages: [
-              {
-                role: 'user',
-                content: roadmapPrompt,
+        
+        try {
+          const coreResponse = await fetch(
+            `https://api.core.ac.uk/v3/search/works?q=${encodeURIComponent(searchQuery)}&limit=3&year_from=${new Date().getFullYear() - 5}`,
+            {
+              headers: {
+                'Authorization': `Bearer ${coreApiKey}`,
               },
-            ],
-            temperature: 0.7,
-          }),
-        });
+            }
+          );
 
-        if (!roadmapResponse.ok) {
-          console.error(`Roadmap generation error for idea "${idea.title}":`, await roadmapResponse.text());
-          continue; // Skip this idea but continue with others
+          if (!coreResponse.ok) {
+            const errorText = await coreResponse.text();
+            console.error(`CORE API error for idea "${idea.title}":`, errorText);
+            throw new Error(`CORE API error: ${errorText}`);
+          }
+
+          const coreData = await coreResponse.json();
+          console.log('CORE API raw response:', JSON.stringify(coreData, null, 2));
+
+          // Validate CORE API response
+          if (!coreData.results || !Array.isArray(coreData.results)) {
+            console.error('Invalid CORE API response format:', coreData);
+            throw new Error('Invalid CORE API response format');
+          }
+
+          // Process and validate each paper
+          const relatedPapers: ResearchPaper[] = [];
+          
+          for (const paper of coreData.results) {
+            if (!paper || typeof paper !== 'object') {
+              console.warn('Invalid paper object:', paper);
+              continue;
+            }
+
+            console.log('Processing paper:', JSON.stringify(paper, null, 2));
+
+            // Extract and validate paper data
+            const paperData: ResearchPaper = {
+              title: typeof paper.title === 'string' ? paper.title : 'Untitled',
+              authors: Array.isArray(paper.authors) 
+                ? paper.authors
+                    .filter((author: any) => author && typeof author === 'object' && author.name)
+                    .map((author: any) => author.name)
+                : ['Unknown Author'],
+              year: typeof paper.yearPublished === 'number' ? paper.yearPublished : new Date().getFullYear(),
+              abstract: typeof paper.abstract === 'string' ? paper.abstract : 'Abstract not available',
+              url: paper.downloadUrl || (paper.doi ? `https://doi.org/${paper.doi}` : '')
+            };
+
+            console.log('Processed paper:', JSON.stringify(paperData, null, 2));
+            relatedPapers.push(paperData);
+          }
+
+          console.log('Final processed research papers:', JSON.stringify(relatedPapers, null, 2));
+
+          if (relatedPapers.length === 0) {
+            console.warn(`No valid research papers found for idea "${idea.title}"`);
+          }
+
+          // Generate detailed roadmap with Mistral AI
+          const roadmapPrompt = `Create a detailed project roadmap for:
+          Title: ${idea.title}
+          Description: ${idea.description}
+          Keywords: ${idea.keywords.join(', ')}
+          Related Research:
+          ${relatedPapers.map(paper => `- ${paper.title} (${paper.year})`).join('\n')}
+
+          Provide a response in this exact JSON format:
+          {
+            "roadmap": {
+              "overview": "Project overview text",
+              "problemStatement": "Problem statement text",
+              "solutionApproach": "Solution approach text",
+              "toolsAndTechnologies": ["tool1", "tool2"],
+              "expectedChallenges": ["challenge1", "challenge2"],
+              "learningResources": [
+                {
+                  "title": "Resource title",
+                  "type": "documentation|tutorial|course",
+                  "url": "https://example.com"
+                }
+              ]
+            }
+          }
+          Don't use placeholder links like 'example.com' etc. Strictly follow the output format mentioned above.`;
+
+          const roadmapResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${mistralApiKey}`,
+            },
+            body: JSON.stringify({
+              model: 'mistral-medium',
+              messages: [
+                {
+                  role: 'user',
+                  content: roadmapPrompt,
+                },
+              ],
+              temperature: 0.7,
+            }),
+          });
+
+          if (!roadmapResponse.ok) {
+            console.error(`Roadmap generation error for idea "${idea.title}":`, await roadmapResponse.text());
+            continue; // Skip this idea but continue with others
+          }
+
+          const roadmapData = await roadmapResponse.json();
+          console.log('Roadmap API response:', roadmapData);
+
+          if (!roadmapData.choices?.[0]?.message?.content) {
+            console.error(`Invalid roadmap response for idea "${idea.title}"`);
+            continue; // Skip this idea but continue with others
+          }
+
+          const parsedRoadmap: RoadmapResponse = JSON.parse(roadmapData.choices[0].message.content);
+          console.log('Parsed roadmap:', parsedRoadmap);
+
+          if (!parsedRoadmap.roadmap) {
+            console.error(`Missing roadmap data for idea "${idea.title}"`);
+            continue; // Skip this idea but continue with others
+          }
+
+          // Store the papers in the project
+          const project = {
+            id: crypto.randomUUID(),
+            title: idea.title,
+            description: idea.description,
+            keywords: idea.keywords,
+            roadmap: parsedRoadmap.roadmap,
+            research_papers: relatedPapers,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            last_viewed_at: new Date().toISOString(),
+            view_count: 0,
+            user_id: userProfile.id
+          };
+
+          console.log('Final project with research papers:', JSON.stringify(project, null, 2));
+          successfulProjects.push(project);
+
+        } catch (error) {
+          console.error('Error processing CORE API response:', error);
+          // Continue with empty research papers rather than failing
+          const project = {
+            id: crypto.randomUUID(),
+            title: idea.title,
+            description: idea.description,
+            keywords: idea.keywords,
+            roadmap: parsedRoadmap.roadmap,
+            research_papers: [], // Empty array if CORE API fails
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            last_viewed_at: new Date().toISOString(),
+            view_count: 0,
+            user_id: userProfile.id
+          };
+          successfulProjects.push(project);
         }
-
-        const roadmapData = await roadmapResponse.json();
-        console.log('Roadmap API response:', roadmapData);
-
-        if (!roadmapData.choices?.[0]?.message?.content) {
-          console.error(`Invalid roadmap response for idea "${idea.title}"`);
-          continue; // Skip this idea but continue with others
-        }
-
-        const parsedRoadmap: RoadmapResponse = JSON.parse(roadmapData.choices[0].message.content);
-        console.log('Parsed roadmap:', parsedRoadmap);
-
-        if (!parsedRoadmap.roadmap) {
-          console.error(`Missing roadmap data for idea "${idea.title}"`);
-          continue; // Skip this idea but continue with others
-        }
-
-        // Add successful project to the collection
-        successfulProjects.push({
-          id: crypto.randomUUID(),
-          title: idea.title,
-          description: idea.description,
-          keywords: idea.keywords,
-          roadmap: parsedRoadmap.roadmap,
-          research_papers: relatedPapers,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          last_viewed_at: new Date().toISOString(),
-          view_count: 0,
-          user_id: userProfile.id
-        });
         
         console.log(`Successfully processed idea: ${idea.title}`);
       } catch (error) {
