@@ -51,6 +51,9 @@ export default function Index() {
         view_count: 0
       }));
   
+      // Log what we're saving to Supabase
+      console.log('Saving to Supabase:', projectsToSave);
+  
       // Save projects to Supabase
       const { error: saveError } = await supabase
         .from('projects')
@@ -68,22 +71,33 @@ export default function Index() {
   
       if (fetchError) throw fetchError;
   
-      // Convert to frontend format
-      const projectsForState = insertedProjects.map((project: any) => ({
-        ...project,
-        researchPapers: project.research_papers || [],
-        roadmap: {
-          ...project.roadmap,
-          overview: project.roadmap?.overview || '',
-          problemStatement: project.roadmap?.problemStatement || '',
-          solutionApproach: project.roadmap?.solutionApproach || '',
-          toolsAndTechnologies: project.roadmap?.toolsAndTechnologies || [],
-          expectedChallenges: project.roadmap?.expectedChallenges || [],
-          learningResources: project.roadmap?.learningResources || []
-        },
-        research_papers: undefined
-      })) as Project[];
+      // Log what we got from Supabase
+      console.log('Retrieved from Supabase:', insertedProjects);
   
+      // Convert to frontend format
+      const projectsForState = insertedProjects.map((project: any) => {
+        // Ensure research_papers exists and is an array
+        const researchPapers = Array.isArray(project.research_papers) ? project.research_papers : [];
+        
+        return {
+          ...project,
+          researchPapers,
+          roadmap: {
+            ...project.roadmap,
+            overview: project.roadmap?.overview || '',
+            problemStatement: project.roadmap?.problemStatement || '',
+            solutionApproach: project.roadmap?.solutionApproach || '',
+            toolsAndTechnologies: project.roadmap?.toolsAndTechnologies || [],
+            expectedChallenges: project.roadmap?.expectedChallenges || [],
+            learningResources: project.roadmap?.learningResources || []
+          },
+          research_papers: undefined
+        };
+      }) as Project[];
+
+      // Log the final transformed projects
+      console.log('Final transformed projects:', projectsForState);
+
       setProjects(projectsForState);
       setRecentlyGeneratedIds(projectsForState.map(p => p.id));
       setShowQuestionnaire(false);
