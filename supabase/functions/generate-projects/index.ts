@@ -40,12 +40,18 @@ interface ResearchPaper {
 }
 
 interface Project {
-  id: string;
+  id?: string;
   title: string;
   description: string;
   keywords: string[];
   roadmap: ProjectRoadmap;
-  researchPapers: ResearchPaper[];
+  research_papers: ResearchPaper[];
+  url_slug?: string;
+  created_at?: string;
+  updated_at?: string;
+  last_viewed_at?: string;
+  view_count?: number;
+  user_id?: string;
 }
 
 interface RoadmapResponse {
@@ -238,7 +244,12 @@ serve(async (req) => {
           description: idea.description,
           keywords: idea.keywords,
           roadmap: parsedRoadmap.roadmap,
-          researchPapers: relatedPapers,
+          research_papers: relatedPapers,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          last_viewed_at: new Date().toISOString(),
+          view_count: 0,
+          user_id: userProfile.id
         });
         
         console.log(`Successfully processed idea: ${idea.title}`);

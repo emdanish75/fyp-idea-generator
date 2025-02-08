@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,8 @@ import { useNavigate } from 'react-router-dom';
 export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [age, setAge] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
@@ -18,6 +19,37 @@ export default function Auth() {
     e.preventDefault();
     try {
       if (isSignUp) {
+        // Trim the name to remove any whitespace
+        const trimmedName = name.trim();
+        
+        if (!trimmedName || trimmedName.length === 0) {
+          toast({
+            title: "Error",
+            description: "Name is required and cannot be empty",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (!age) {
+          toast({
+            title: "Error",
+            description: "Age is required for signup",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const ageNumber = parseInt(age);
+        if (isNaN(ageNumber) || ageNumber < 1) {
+          toast({
+            title: "Error",
+            description: "Please enter a valid age",
+            variant: "destructive",
+          });
+          return;
+        }
+
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
@@ -29,17 +61,29 @@ export default function Auth() {
         if (signUpData.user) {
           const { error: profileError } = await supabase
             .from('profiles')
-            .insert([{ id: signUpData.user.id }]);
+            .insert({
+              id: signUpData.user.id,
+              name: trimmedName, // Use the trimmed name
+              age: ageNumber,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            });
 
           if (profileError) {
             console.error('Profile creation error:', profileError);
-            // Don't throw the error as the signup was successful
+            toast({
+              title: "Error",
+              description: "Failed to create user profile",
+              variant: "destructive",
+            });
+            return;
           }
         }
 
         toast({
           title: "Success",
           description: "Please check your email to confirm your account, then sign in.",
+          variant: "success"
         });
         setIsSignUp(false);
       } else {
@@ -47,6 +91,7 @@ export default function Auth() {
         toast({
           title: "Success",
           description: "Successfully signed in",
+          variant: "success"
         });
         navigate('/landing');
       }
@@ -66,6 +111,31 @@ export default function Auth() {
           {isSignUp ? 'Create Account' : 'Sign In'}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {isSignUp && (
+            <>
+              <div>
+                <Input
+                  type="text"
+                  placeholder="Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="w-full"
+                />
+              </div>
+              <div>
+                <Input
+                  type="number"
+                  placeholder="Age"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  required
+                  className="w-full"
+                  min="1"
+                />
+              </div>
+            </>
+          )}
           <div>
             <Input
               type="email"

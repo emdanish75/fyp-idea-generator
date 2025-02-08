@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -15,10 +14,11 @@ export default function Landing() {
       toast({
         title: "Please sign in first",
         description: "You need to be signed in to access the FYP Idea Generator",
+        variant: "default"
       });
       navigate("/auth");
     } else {
-      navigate("/");
+      navigate("/generator");
     }
   };
 
@@ -35,7 +35,7 @@ export default function Landing() {
           IdeaGen
         </h1>
         <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mb-8">
-          Unlock your potential with AI-powered FYP ideas tailored to your interests and expertise
+          Unlock your potential with AI-powered ideas tailored to your interests and expertise
         </p>
         <Button 
           size="lg" 
@@ -78,6 +78,7 @@ export default function Landing() {
               </motion.div>
             ))}
           </div>
+          <p className="text-center text-muted-foreground mt-12 italic">More features coming soon :)</p>
         </div>
       </section>
 

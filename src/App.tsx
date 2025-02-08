@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -32,16 +31,17 @@ const AppRoutes = () => {
       <Navbar />
       <div className="pt-16"> {/* Add padding to account for fixed navbar */}
         <Routes>
+          <Route path="/" element={<Navigate to="/landing" replace />} />
           <Route path="/landing" element={<Landing />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/" element={
+          <Route path="/generator" element={
             <ProtectedRoute>
               <Index />
             </ProtectedRoute>
           } />
-          <Route path="/project/:id" element={
+          <Route path="/project/:url_slug" element={
             <ProtectedRoute>
               <ProjectDetails />
             </ProtectedRoute>
