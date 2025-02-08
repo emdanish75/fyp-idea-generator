@@ -76,12 +76,8 @@ export default function Index() {
   
       // Convert to frontend format
       const projectsForState = insertedProjects.map((project: any) => {
-        // Ensure research_papers exists and is an array
-        const researchPapers = Array.isArray(project.research_papers) ? project.research_papers : [];
-        
         return {
           ...project,
-          researchPapers,
           roadmap: {
             ...project.roadmap,
             overview: project.roadmap?.overview || '',
@@ -90,8 +86,7 @@ export default function Index() {
             toolsAndTechnologies: project.roadmap?.toolsAndTechnologies || [],
             expectedChallenges: project.roadmap?.expectedChallenges || [],
             learningResources: project.roadmap?.learningResources || []
-          },
-          research_papers: undefined
+          }
         };
       }) as Project[];
 

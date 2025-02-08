@@ -175,7 +175,7 @@ serve(async (req) => {
             throw new Error('Invalid CORE API response format');
           }
 
-          // Process and validate each paper
+          // Process papers
           for (const paper of coreData.results) {
             if (!paper || typeof paper !== 'object') {
               console.warn('Invalid paper object:', paper);
@@ -184,7 +184,6 @@ serve(async (req) => {
 
             console.log('Processing paper:', JSON.stringify(paper, null, 2));
 
-            // Extract and validate paper data
             const paperData: ResearchPaper = {
               title: typeof paper.title === 'string' ? paper.title : 'Untitled',
               authors: Array.isArray(paper.authors) 
@@ -207,32 +206,31 @@ serve(async (req) => {
             console.warn(`No valid research papers found for idea "${idea.title}"`);
           }
 
-          // Generate detailed roadmap with Mistral AI
+          // Generate roadmap with research papers context
           const roadmapPrompt = `Create a detailed project roadmap for:
-          Title: ${idea.title}
-          Description: ${idea.description}
-          Keywords: ${idea.keywords.join(', ')}
-          Related Research:
-          ${relatedPapers.map(paper => `- ${paper.title} (${paper.year})`).join('\n')}
-
-          Provide a response in this exact JSON format:
-          {
-            "roadmap": {
-              "overview": "Project overview text",
-              "problemStatement": "Problem statement text",
-              "solutionApproach": "Solution approach text",
-              "toolsAndTechnologies": ["tool1", "tool2"],
-              "expectedChallenges": ["challenge1", "challenge2"],
-              "learningResources": [
-                {
-                  "title": "Resource title",
-                  "type": "documentation|tutorial|course",
-                  "url": "https://example.com"
-                }
-              ]
-            }
-          }
-          Don't use placeholder links like 'example.com' etc. Strictly follow the output format mentioned above.`;
+            Title: ${idea.title}
+            Description: ${idea.description}
+            Keywords: ${idea.keywords.join(', ')}
+            Related Research:
+            ${relatedPapers.map(paper => `- ${paper.title} (${paper.year})`).join('\n')}
+            
+            Provide a response in this exact JSON format:
+            {
+              "roadmap": {
+                "overview": "Comprehensive project overview",
+                "problemStatement": "Clear problem statement",
+                "solutionApproach": "Detailed solution approach",
+                "toolsAndTechnologies": ["tool1", "tool2"],
+                "expectedChallenges": ["challenge1", "challenge2"],
+                "learningResources": [
+                  {
+                    "title": "Resource Title",
+                    "type": "documentation|tutorial|course|book",
+                    "url": "resource_url"
+                  }
+                ]
+              }
+            }`;
 
           const roadmapResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
             method: 'POST',
@@ -273,7 +271,7 @@ serve(async (req) => {
             continue; // Skip this idea but continue with others
           }
 
-          // Store the papers in the project
+          // Create project with collected papers
           const project = {
             id: crypto.randomUUID(),
             title: idea.title,
@@ -293,21 +291,7 @@ serve(async (req) => {
 
         } catch (error) {
           console.error('Error processing CORE API response:', error);
-          // Continue with empty research papers rather than failing
-          const project = {
-            id: crypto.randomUUID(),
-            title: idea.title,
-            description: idea.description,
-            keywords: idea.keywords,
-            roadmap: parsedRoadmap.roadmap,
-            research_papers: [], // Empty array if CORE API fails
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            last_viewed_at: new Date().toISOString(),
-            view_count: 0,
-            user_id: userProfile.id
-          };
-          successfulProjects.push(project);
+          throw error; // Let the outer try-catch handle the error
         }
         
         console.log(`Successfully processed idea: ${idea.title}`);
