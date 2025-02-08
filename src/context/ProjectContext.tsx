@@ -71,7 +71,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
             title: project.title,
             description: project.description,
             keywords: project.keywords,
-            roadmap: project.roadmap as Json,
+            roadmap: project.roadmap as unknown as Json,
             research_papers: project.researchPapers as unknown as Json[],
             user_id: user.id,
           });
@@ -111,8 +111,8 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
           title: item.title,
           description: item.description,
           keywords: item.keywords || [],
-          roadmap: item.roadmap as Roadmap,
-          researchPapers: (item.research_papers || []) as ResearchPaper[],
+          roadmap: item.roadmap as unknown as Roadmap,
+          researchPapers: (item.research_papers || []) as unknown as ResearchPaper[],
           user_id: item.user_id
         }));
         
