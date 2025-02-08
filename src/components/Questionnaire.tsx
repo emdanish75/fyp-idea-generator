@@ -1,10 +1,10 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { BasicInformation } from './questionnaire/BasicInformation';
 import { SkillsAndInterests } from './questionnaire/SkillsAndInterests';
 import { WorkStyle } from './questionnaire/WorkStyle';
+import { Heart } from "lucide-react";
 
 export interface QuestionnaireData {
   university: string;
@@ -20,9 +20,10 @@ export interface QuestionnaireData {
 interface QuestionnaireProps {
   onSubmit: (data: QuestionnaireData) => void;
   isLoading: boolean;
+  onBack: () => void;
 }
 
-export function Questionnaire({ onSubmit, isLoading }: QuestionnaireProps) {
+export function Questionnaire({ onSubmit, isLoading, onBack }: QuestionnaireProps) {
   const [formData, setFormData] = useState<Partial<QuestionnaireData>>({
     university: '',
     semester: '',
@@ -58,35 +59,51 @@ export function Questionnaire({ onSubmit, isLoading }: QuestionnaireProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background pt-20">
-      <h1 className="text-4xl font-bold text-center mb-12 bg-gradient-to-r from-primary via-purple-500 to-pink-500 text-transparent bg-clip-text">
-        FYP Idea Generator
-      </h1>
-      <form onSubmit={handleSubmit} className="space-y-8 w-full max-w-3xl mx-auto p-6 glass-morphism rounded-lg">
-        <BasicInformation 
-          formData={formData} 
-          setFormData={setFormData}
-          fieldofstudy={fieldofstudy}
-        />
-        
-        <SkillsAndInterests 
-          formData={formData} 
-          setFormData={setFormData}
-        />
-        
-        <WorkStyle 
-          formData={formData} 
-          setFormData={setFormData}
-        />
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto py-8 pb-16">
+        <div className="max-w-2xl mx-auto space-y-8">
 
-        <Button 
-          type="submit" 
-          disabled={isLoading}
-          className="w-full mt-8"
-        >
-          {isLoading ? 'Generating Ideas...' : 'Generate Project Ideas'}
-        </Button>
-      </form>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <BasicInformation 
+              formData={formData} 
+              setFormData={setFormData}
+              fieldofstudy={fieldofstudy}
+            />
+            
+            <SkillsAndInterests 
+              formData={formData} 
+              setFormData={setFormData}
+            />
+            
+            <WorkStyle 
+              formData={formData} 
+              setFormData={setFormData}
+            />
+
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+              className="w-full mt-8"
+            >
+              {isLoading ? 'Generating Ideas...' : 'Generate Project Ideas'}
+            </Button>
+          </form>
+        </div>
+      </div>
+
+      <footer className="py-8 text-center">
+        <p className="flex items-center justify-center gap-2 text-muted-foreground">
+          Made with <Heart className="text-red-500 animate-pulse" size={16} /> by{" "}
+          <a 
+            href="https://emdanish.vercel.app/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-primary hover:text-primary/80 underline-offset-4 hover:underline transition-colors"
+          >
+            Danish
+          </a>
+        </p>
+      </footer>
     </div>
   );
 }

@@ -50,9 +50,7 @@ export function ProjectCard({ project, onBack }: ProjectCardProps) {
             <CardTitle className="text-2xl font-bold text-foreground mb-2">{project.title}</CardTitle>
             <CardDescription className="text-muted-foreground">{project.description}</CardDescription>
           </div>
-          <Button variant="outline" onClick={onBack} className="shrink-0">
-            Back
-          </Button>
+          
         </div>
         <div className="flex flex-wrap gap-2 mt-4">
           {project.keywords.map((keyword, index) => (

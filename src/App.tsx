@@ -14,6 +14,7 @@ import ProjectDetails from "./pages/ProjectDetails";
 import Auth from "@/components/Auth";
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/context/AuthContext";
+import { Layout } from "./components/Layout";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
@@ -63,7 +64,9 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <AppRoutes />
+            <Layout>
+              <AppRoutes />
+            </Layout>
           </BrowserRouter>
         </TooltipProvider>
       </ProjectProvider>

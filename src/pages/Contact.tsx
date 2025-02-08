@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,8 +78,9 @@ export default function Contact() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-20 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto py-8 pb-16">
+        
         <motion.h1 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -192,6 +192,20 @@ export default function Contact() {
           </motion.div>
         </div>
       </div>
+
+      <footer className="py-8 text-center">
+        <p className="flex items-center justify-center gap-2 text-muted-foreground">
+          Made with <Heart className="text-red-500 animate-pulse" size={16} /> by{" "}
+          <a 
+            href="https://emdanish.vercel.app/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-primary hover:text-primary/80 underline-offset-4 hover:underline transition-colors"
+          >
+            Danish
+          </a>
+        </p>
+      </footer>
     </div>
   );
 }

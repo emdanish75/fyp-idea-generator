@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
+import { Heart } from 'lucide-react';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
@@ -105,72 +106,90 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="w-full max-w-md p-8 glass-morphism rounded-lg">
-        <h2 className="text-2xl font-bold mb-6 text-center bg-gradient-to-r from-primary via-purple-500 to-pink-500 text-transparent bg-clip-text">
-          {isSignUp ? 'Create Account' : 'Sign In'}
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {isSignUp && (
-            <>
-              <div>
-                <Input
-                  type="text"
-                  placeholder="Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  className="w-full"
-                />
-              </div>
-              <div>
-                <Input
-                  type="number"
-                  placeholder="Age"
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
-                  required
-                  className="w-full"
-                  min="1"
-                />
-              </div>
-            </>
-          )}
-          <div>
-            <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full"
-            />
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto flex flex-col items-center justify-center min-h-[calc(100vh-8rem)]">
+        <div className="w-full max-w-md space-y-8 p-8">
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-bold">Welcome Back</h1>
+            <p className="text-muted-foreground">Sign in to continue to IdeaGen</p>
           </div>
-          <div>
-            <Input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full"
-            />
-          </div>
-          <Button type="submit" className="w-full">
-            {isSignUp ? 'Sign Up' : 'Sign In'}
-          </Button>
-        </form>
-        <p className="mt-4 text-center text-muted-foreground">
-          <button
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="text-primary hover:underline"
-          >
-            {isSignUp
-              ? 'Already have an account? Sign in'
-              : "Don't have an account? Sign up"}
-          </button>
-        </p>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {isSignUp && (
+              <>
+                <div>
+                  <Input
+                    type="text"
+                    placeholder="Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="w-full"
+                  />
+                </div>
+                <div>
+                  <Input
+                    type="number"
+                    placeholder="Age"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    required
+                    className="w-full"
+                    min="1"
+                  />
+                </div>
+              </>
+            )}
+            <div>
+              <Input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full"
+              />
+            </div>
+            <div>
+              <Input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full"
+              />
+            </div>
+            <Button type="submit" className="w-full">
+              {isSignUp ? 'Sign Up' : 'Sign In'}
+            </Button>
+          </form>
+          <p className="mt-4 text-center text-muted-foreground">
+            <button
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="text-primary hover:underline"
+            >
+              {isSignUp
+                ? 'Already have an account? Sign in'
+                : "Don't have an account? Sign up"}
+            </button>
+          </p>
+        </div>
       </div>
+
+      <footer className="py-8 text-center">
+        <p className="flex items-center justify-center gap-2 text-muted-foreground">
+          Made with <Heart className="text-red-500 animate-pulse" size={16} /> by{" "}
+          <a 
+            href="https://emdanish.vercel.app/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-primary hover:text-primary/80 underline-offset-4 hover:underline transition-colors"
+          >
+            Danish
+          </a>
+        </p>
+      </footer>
     </div>
   );
 }

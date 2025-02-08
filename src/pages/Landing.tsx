@@ -82,7 +82,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="py-8 text-center">
         <p className="flex items-center justify-center gap-2 text-muted-foreground">
           Made with <Heart className="text-red-500 animate-pulse" size={16} /> by{" "}

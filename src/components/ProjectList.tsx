@@ -28,7 +28,7 @@ export function ProjectList({ projects }: ProjectListProps) {
             <CardDescription>{project.description}</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground">
               {project.roadmap.overview}
             </p>
           </CardContent>
