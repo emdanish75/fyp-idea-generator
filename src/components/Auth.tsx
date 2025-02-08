@@ -110,8 +110,14 @@ export default function Auth() {
       <div className="container mx-auto flex flex-col items-center justify-center min-h-[calc(100vh-8rem)]">
         <div className="w-full max-w-md space-y-8 p-8">
           <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold">Welcome Back</h1>
-            <p className="text-muted-foreground">Sign in to continue to IdeaGen</p>
+            <h1 className="text-3xl font-bold">
+              {isSignUp ? 'Make an Account' : 'Welcome Back'}
+            </h1>
+            <p className="text-muted-foreground">
+              {isSignUp 
+                ? 'Create an account to start generating ideas' 
+                : 'Sign in to continue to IdeaGen'}
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
