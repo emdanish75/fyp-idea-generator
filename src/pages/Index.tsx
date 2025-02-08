@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ProjectList } from '@/components/ProjectList';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Project } from '@/context/ProjectContext';
 
 export default function Index() {
   const { user } = useAuth();
@@ -68,11 +69,20 @@ export default function Index() {
       if (fetchError) throw fetchError;
   
       // Convert to frontend format
-      const projectsForState = insertedProjects.map(project => ({
+      const projectsForState = insertedProjects.map((project: any) => ({
         ...project,
-        researchPapers: project.research_papers,
+        researchPapers: project.research_papers || [],
+        roadmap: {
+          ...project.roadmap,
+          overview: project.roadmap?.overview || '',
+          problemStatement: project.roadmap?.problemStatement || '',
+          solutionApproach: project.roadmap?.solutionApproach || '',
+          toolsAndTechnologies: project.roadmap?.toolsAndTechnologies || [],
+          expectedChallenges: project.roadmap?.expectedChallenges || [],
+          learningResources: project.roadmap?.learningResources || []
+        },
         research_papers: undefined
-      }));
+      })) as Project[];
   
       setProjects(projectsForState);
       setRecentlyGeneratedIds(projectsForState.map(p => p.id));
