@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/components/ui/use-toast';
+import { Json } from '@/integrations/supabase/types';
 
 interface LearningResource {
   title: string;
@@ -66,7 +67,12 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
         const { error } = await supabase
           .from('projects')
           .upsert({
-            ...project,
+            id: project.id,
+            title: project.title,
+            description: project.description,
+            keywords: project.keywords,
+            roadmap: project.roadmap as Json,
+            research_papers: project.researchPapers as unknown as Json[],
             user_id: user.id,
           });
 
@@ -99,8 +105,19 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       if (error) throw error;
 
       if (data) {
-        setProjects(data);
-        console.log('Projects fetched successfully:', data);
+        // Transform the data to match our frontend Project interface
+        const transformedProjects: Project[] = data.map(item => ({
+          id: item.id,
+          title: item.title,
+          description: item.description,
+          keywords: item.keywords || [],
+          roadmap: item.roadmap as Roadmap,
+          researchPapers: (item.research_papers || []) as ResearchPaper[],
+          user_id: item.user_id
+        }));
+        
+        setProjects(transformedProjects);
+        console.log('Projects fetched successfully:', transformedProjects);
       }
     } catch (error: any) {
       console.error('Error fetching projects:', error);
