@@ -143,6 +143,9 @@ serve(async (req) => {
       try {
         console.log('Processing idea:', idea.title);
         
+        // Initialize relatedPapers array for each idea
+        const relatedPapers: ResearchPaper[] = [];
+        
         // Search for related papers using CORE API
         console.log('Searching papers for keywords:', idea.keywords);
         const searchQuery = idea.keywords.join(' OR ');
@@ -173,8 +176,6 @@ serve(async (req) => {
           }
 
           // Process and validate each paper
-          const relatedPapers: ResearchPaper[] = [];
-          
           for (const paper of coreData.results) {
             if (!paper || typeof paper !== 'object') {
               console.warn('Invalid paper object:', paper);

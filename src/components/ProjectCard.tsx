@@ -32,7 +32,7 @@ interface Project {
   description: string;
   keywords: string[];
   roadmap: Roadmap;
-  researchPapers: ResearchPaper[];
+  research_papers: ResearchPaper[];
   url_slug: string;
 }
 
@@ -128,7 +128,7 @@ export function ProjectCard({ project, onBack }: ProjectCardProps) {
           <h3 className="text-lg font-semibold mb-2">Related Research Papers</h3>
           <ScrollArea className="h-[300px] rounded-md border p-4">
             <div className="space-y-6">
-              {project.researchPapers.map((paper, index) => (
+              {project.research_papers.map((paper, index) => (
                 <div key={index} className="space-y-2">
                   <h4 className="font-medium text-foreground">{paper.title}</h4>
                   <p className="text-sm text-muted-foreground">

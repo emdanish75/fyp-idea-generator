@@ -29,7 +29,7 @@ export interface Project {
   description: string;
   keywords: string[];
   roadmap: Roadmap;
-  researchPapers: ResearchPaper[];
+  research_papers: ResearchPaper[];
   url_slug: string;
   created_at?: string;
   updated_at?: string;
