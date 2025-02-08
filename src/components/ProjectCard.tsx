@@ -33,6 +33,7 @@ interface Project {
   keywords: string[];
   roadmap: Roadmap;
   researchPapers: ResearchPaper[];
+  url_slug: string;
 }
 
 interface ProjectCardProps {

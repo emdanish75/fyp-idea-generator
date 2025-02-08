@@ -30,6 +30,11 @@ export interface Project {
   keywords: string[];
   roadmap: Roadmap;
   researchPapers: ResearchPaper[];
+  url_slug: string;
+  created_at?: string;
+  updated_at?: string;
+  last_viewed_at?: string;
+  view_count?: number;
 }
 
 interface ProjectContextType {
