@@ -323,9 +323,25 @@ serve(async (req) => {
       throw new Error('No projects could be generated successfully');
     }
 
+    // Convert to frontend format
+    const projectsForState = successfulProjects.map((project: any) => {
+      return {
+        ...project,
+        roadmap: {
+          ...project.roadmap,
+          overview: project.roadmap?.overview || '',
+          problemStatement: project.roadmap?.problemStatement || '',
+          solutionApproach: project.roadmap?.solutionApproach || '',
+          toolsAndTechnologies: project.roadmap?.toolsAndTechnologies || [],
+          expectedChallenges: project.roadmap?.expectedChallenges || [],
+          learningResources: project.roadmap?.learningResources || []
+        }
+      };
+    }) as Project[];
+
     return new Response(
       JSON.stringify({
-        projects: successfulProjects,
+        projects: projectsForState,
       }),
       {
         headers: {
