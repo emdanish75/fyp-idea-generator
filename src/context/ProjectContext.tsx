@@ -41,19 +41,28 @@ interface ProjectContextType {
   projects: Project[];
   setProjects: (projects: Project[]) => void;
   getProjectById: (id: string) => Project | undefined;
+  recentlyGeneratedIds: string[];
+  setRecentlyGeneratedIds: (ids: string[]) => void;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
 export function ProjectProvider({ children }: { children: ReactNode }) {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [recentlyGeneratedIds, setRecentlyGeneratedIds] = useState<string[]>([]);
 
   const getProjectById = (id: string) => {
     return projects.find(project => project.id === id);
   };
 
   return (
-    <ProjectContext.Provider value={{ projects, setProjects, getProjectById }}>
+    <ProjectContext.Provider value={{ 
+      projects, 
+      setProjects, 
+      getProjectById, 
+      recentlyGeneratedIds, 
+      setRecentlyGeneratedIds 
+    }}>
       {children}
     </ProjectContext.Provider>
   );

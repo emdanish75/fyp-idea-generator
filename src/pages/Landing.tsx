@@ -14,10 +14,11 @@ export default function Landing() {
       toast({
         title: "Please sign in first",
         description: "You need to be signed in to access the FYP Idea Generator",
+        variant: "default"
       });
       navigate("/auth");
     } else {
-      navigate("/");
+      navigate("/generator");
     }
   };
 

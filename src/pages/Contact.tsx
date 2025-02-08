@@ -30,6 +30,7 @@ export default function Contact() {
       toast({
         title: "Message received",
         description: "I'll get back to you soon :)",
+        variant: "success",
       });
 
       setContactForm({ name: "", email: "", message: "" });
@@ -62,6 +63,7 @@ export default function Contact() {
       toast({
         title: "Thank you!",
         description: "Your review has been submitted.",
+        variant: "success",
       });
 
       setReviewForm({ name: "", rating: "", review: "" });
@@ -93,7 +95,7 @@ export default function Contact() {
           transition={{ delay: 0.2 }}
           className="text-center text-lg text-muted-foreground mb-12"
         >
-          We value your feedback and suggestions. Help us improve IdeaGen and make it even better for everyone!
+          I value your feedback and suggestions. Help me improve IdeaGen and make it even better for everyone!
         </motion.p>
 
         <div className="grid md:grid-cols-2 gap-12">

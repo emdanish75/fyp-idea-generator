@@ -2,20 +2,27 @@ import { useAuth } from '@/context/AuthContext';
 import Auth from '@/components/Auth';
 import { Questionnaire, QuestionnaireData } from '@/components/Questionnaire';
 import { useProjects } from '@/context/ProjectContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ProjectList } from '@/components/ProjectList';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Index() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const { projects, setProjects } = useProjects();
+  const { projects, setProjects, recentlyGeneratedIds, setRecentlyGeneratedIds } = useProjects();
   const [showQuestionnaire, setShowQuestionnaire] = useState(true);
-  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Check location state on mount and when it changes
+  useEffect(() => {
+    if (location.state?.showRecent && recentlyGeneratedIds.length > 0) {
+      setShowQuestionnaire(false);
+    }
+  }, [location.state, recentlyGeneratedIds]);
 
   const handleQuestionnaireSubmit = async (data: QuestionnaireData) => {
     setIsLoading(true);
@@ -68,6 +75,7 @@ export default function Index() {
       }));
   
       setProjects(projectsForState);
+      setRecentlyGeneratedIds(projectsForState.map(p => p.id));
       setShowQuestionnaire(false);
       
       toast({
@@ -113,7 +121,9 @@ export default function Index() {
           >
             ← Generate New Ideas
           </Button>
-          <ProjectList projects={projects} />
+          <ProjectList 
+            projects={projects.filter(p => recentlyGeneratedIds.includes(p.id))} 
+          />
         </div>
       )}
     </div>

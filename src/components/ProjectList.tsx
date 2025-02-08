@@ -9,6 +9,7 @@ interface Project {
   roadmap: {
     overview: string;
   };
+  url_slug: string;
 }
 
 interface ProjectListProps {
@@ -21,22 +22,20 @@ export function ProjectList({ projects }: ProjectListProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {projects.map((project) => (
-        <Card key={project.id} className="glass-morphism flex flex-col">
+        <Card key={project.id} className="flex flex-col">
           <CardHeader>
-            <CardTitle className="text-xl font-bold text-foreground">{project.title}</CardTitle>
-            <CardDescription className="text-muted-foreground line-clamp-2">
-              {project.description}
-            </CardDescription>
+            <CardTitle>{project.title}</CardTitle>
+            <CardDescription>{project.description}</CardDescription>
           </CardHeader>
-          <CardContent className="flex-grow">
-            <p className="text-sm text-muted-foreground line-clamp-3">
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
               {project.roadmap.overview}
             </p>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="mt-auto">
             <Button 
               className="w-full"
-              onClick={() => navigate(`/project/${project.id}`)}
+              onClick={() => navigate(`/project/${project.url_slug}`)}
             >
               Explore
             </Button>
