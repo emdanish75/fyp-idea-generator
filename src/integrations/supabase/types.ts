@@ -9,6 +9,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number
@@ -33,48 +60,30 @@ export type Database = {
         }
         Relationships: []
       }
-      projects: {
+      reviews: {
         Row: {
           created_at: string
-          description: string
           id: string
-          keywords: string[] | null
-          last_viewed_at: string | null
-          research_papers: Json[] | null
-          roadmap: Json
-          title: string
-          updated_at: string
-          url_slug: string | null
+          name: string
+          rating: number
+          review: string
           user_id: string | null
-          view_count: number | null
         }
         Insert: {
           created_at?: string
-          description: string
           id?: string
-          keywords?: string[] | null
-          last_viewed_at?: string | null
-          research_papers?: Json[] | null
-          roadmap: Json
-          title: string
-          updated_at?: string
-          url_slug?: string | null
+          name: string
+          rating: number
+          review: string
           user_id?: string | null
-          view_count?: number | null
         }
         Update: {
           created_at?: string
-          description?: string
           id?: string
-          keywords?: string[] | null
-          last_viewed_at?: string | null
-          research_papers?: Json[] | null
-          roadmap?: Json
-          title?: string
-          updated_at?: string
-          url_slug?: string | null
+          name?: string
+          rating?: number
+          review?: string
           user_id?: string | null
-          view_count?: number | null
         }
         Relationships: []
       }

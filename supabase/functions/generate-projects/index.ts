@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const mistralApiKey = Deno.env.get('MISTRAL_API_KEY')!;
@@ -53,8 +52,16 @@ interface RoadmapResponse {
   roadmap: ProjectRoadmap;
 }
 
-async function generateInitialIdeas(userProfile: any): Promise<ProjectIdea[]> {
-  const initialPrompt = `Analyze this student profile and generate 3 personalized project/thesis ideas based on their preferences and field of study:
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { data: userProfile } = await req.json();
+    console.log('Received user profile:', userProfile);
+
+    const initialPrompt = `Analyze this student profile and generate 3 personalized project/thesis ideas based on their preferences and field of study:
     Name: ${userProfile.name}
     Major: ${userProfile.major}
     Semester: ${userProfile.semester}
@@ -84,185 +91,173 @@ async function generateInitialIdeas(userProfile: any): Promise<ProjectIdea[]> {
       ]
     }`;
 
-  const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${mistralApiKey}`,
-    },
-    body: JSON.stringify({
-      model: 'mistral-medium',
-      messages: [{ role: 'user', content: initialPrompt }],
-      temperature: 0.7,
-    }),
-  });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('Mistral API error:', errorText);
-    throw new Error(`Mistral API error: ${errorText}`);
-  }
-
-  const data = await response.json();
-  console.log('Mistral API response:', data);
-
-  if (!data.choices?.[0]?.message?.content) {
-    throw new Error('Invalid response from Mistral API');
-  }
-
-  const parsedIdeas: ProjectIdeasResponse = JSON.parse(data.choices[0].message.content);
-  console.log('Parsed ideas:', parsedIdeas);
-
-  if (!parsedIdeas.ideas || !Array.isArray(parsedIdeas.ideas)) {
-    throw new Error('Invalid ideas format from Mistral API');
-  }
-
-  return parsedIdeas.ideas;
-}
-
-async function searchRelatedPapers(keywords: string[]): Promise<ResearchPaper[]> {
-  console.log('Searching papers for keywords:', keywords);
-  const searchQuery = keywords.join(' OR ');
-  const response = await fetch(
-    `https://api.core.ac.uk/v3/search/works?q=${encodeURIComponent(searchQuery)}&limit=3&year_from=${new Date().getFullYear() - 5}`,
-    {
+    const mistralResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
+      method: 'POST',
       headers: {
-        'Authorization': `Bearer ${coreApiKey}`,
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${mistralApiKey}`,
       },
-    }
-  );
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('CORE API error:', errorText);
-    throw new Error(`CORE API error: ${errorText}`);
-  }
-
-  const data = await response.json();
-  console.log('CORE API response:', data);
-
-  return data.results.map((paper: any) => ({
-    title: paper.title,
-    authors: paper.authors?.map((author: any) => author.name) || [],
-    year: paper.yearPublished || new Date().getFullYear(),
-    abstract: paper.abstract || 'Abstract not available',
-    url: paper.downloadUrl || (paper.doi ? `https://doi.org/${paper.doi}` : ''),
-  }));
-}
-
-async function generateProjectRoadmap(idea: ProjectIdea, relatedPapers: ResearchPaper[]): Promise<ProjectRoadmap> {
-  const roadmapPrompt = `Create a detailed project roadmap for:
-    Title: ${idea.title}
-    Description: ${idea.description}
-    Keywords: ${idea.keywords.join(', ')}
-    Related Research:
-    ${relatedPapers.map(paper => `- ${paper.title} (${paper.year})`).join('\n')}
-
-    Provide a response in this exact JSON format:
-    {
-      "roadmap": {
-        "overview": "Project overview text",
-        "problemStatement": "Problem statement text",
-        "solutionApproach": "Solution approach text",
-        "toolsAndTechnologies": ["tool1", "tool2"],
-        "expectedChallenges": ["challenge1", "challenge2"],
-        "learningResources": [
+      body: JSON.stringify({
+        model: 'mistral-medium',
+        messages: [
           {
-            "title": "Resource title",
-            "type": "documentation|tutorial|course",
-            "url": "https://example.com"
-          }
-        ]
-      }
+            role: 'user',
+            content: initialPrompt,
+          },
+        ],
+        temperature: 0.7,
+      }),
+    });
+
+    if (!mistralResponse.ok) {
+      const errorText = await mistralResponse.text();
+      console.error('Mistral API error:', errorText);
+      throw new Error(`Mistral API error: ${errorText}`);
     }
-    Don't use placeholder links like 'example.com' etc. Strictly follow the output format mentioned above.`;
 
-  const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${mistralApiKey}`,
-    },
-    body: JSON.stringify({
-      model: 'mistral-medium',
-      messages: [{ role: 'user', content: roadmapPrompt }],
-      temperature: 0.7,
-    }),
-  });
+    const mistralData = await mistralResponse.json();
+    console.log('Mistral API response:', mistralData);
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('Roadmap generation error:', errorText);
-    throw new Error(`Roadmap generation error: ${errorText}`);
-  }
+    if (!mistralData.choices?.[0]?.message?.content) {
+      throw new Error('Invalid response from Mistral API');
+    }
 
-  const data = await response.json();
-  console.log('Roadmap API response:', data);
+    const parsedIdeas: ProjectIdeasResponse = JSON.parse(mistralData.choices[0].message.content);
+    console.log('Parsed ideas:', parsedIdeas);
 
-  if (!data.choices?.[0]?.message?.content) {
-    throw new Error('Invalid roadmap response');
-  }
+    if (!parsedIdeas.ideas || !Array.isArray(parsedIdeas.ideas)) {
+      throw new Error('Invalid ideas format from Mistral API');
+    }
 
-  const parsedRoadmap: RoadmapResponse = JSON.parse(data.choices[0].message.content);
-  console.log('Parsed roadmap:', parsedRoadmap);
-
-  if (!parsedRoadmap.roadmap) {
-    throw new Error('Missing roadmap data');
-  }
-
-  return parsedRoadmap.roadmap;
-}
-
-async function processProjectIdea(idea: ProjectIdea): Promise<Project> {
-  try {
-    console.log('Processing idea:', idea.title);
-    
-    const relatedPapers = await searchRelatedPapers(idea.keywords);
-    const roadmap = await generateProjectRoadmap(idea, relatedPapers);
-
-    return {
-      id: crypto.randomUUID(),
-      title: idea.title,
-      description: idea.description,
-      keywords: idea.keywords,
-      roadmap,
-      researchPapers: relatedPapers,
-    };
-  } catch (error) {
-    console.error(`Error processing idea "${idea.title}":`, error);
-    throw error;
-  }
-}
-
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
-  try {
-    const { data: userProfile } = await req.json();
-    console.log('Received user profile:', userProfile);
-
-    const ideas = await generateInitialIdeas(userProfile);
+    // Process each idea independently and collect successful results
     const successfulProjects: Project[] = [];
-
-    for (const idea of ideas) {
+    
+    for (const idea of parsedIdeas.ideas) {
       try {
-        const project = await processProjectIdea(idea);
-        successfulProjects.push(project);
+        console.log('Processing idea:', idea.title);
+        
+        // Search for related papers using CORE API
+        console.log('Searching papers for keywords:', idea.keywords);
+        const searchQuery = idea.keywords.join(' OR ');
+        const coreResponse = await fetch(
+          `https://api.core.ac.uk/v3/search/works?q=${encodeURIComponent(searchQuery)}&limit=3&year_from=${new Date().getFullYear() - 5}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${coreApiKey}`,
+            },
+          }
+        );
+
+        if (!coreResponse.ok) {
+          console.error(`CORE API error for idea "${idea.title}":`, await coreResponse.text());
+          continue; // Skip this idea but continue with others
+        }
+
+        const coreData = await coreResponse.json();
+        console.log('CORE API response:', coreData);
+
+        const relatedPapers: ResearchPaper[] = coreData.results.map((paper: any) => ({
+          title: paper.title,
+          authors: paper.authors?.map((author: any) => author.name) || [],
+          year: paper.yearPublished || new Date().getFullYear(),
+          abstract: paper.abstract || 'Abstract not available',
+          url: paper.downloadUrl || (paper.doi ? `https://doi.org/${paper.doi}` : ''),
+        }));
+
+        // Generate detailed roadmap with Mistral AI
+        const roadmapPrompt = `Create a detailed project roadmap for:
+        Title: ${idea.title}
+        Description: ${idea.description}
+        Keywords: ${idea.keywords.join(', ')}
+        Related Research:
+        ${relatedPapers.map(paper => `- ${paper.title} (${paper.year})`).join('\n')}
+
+        Provide a response in this exact JSON format:
+        {
+          "roadmap": {
+            "overview": "Project overview text",
+            "problemStatement": "Problem statement text",
+            "solutionApproach": "Solution approach text",
+            "toolsAndTechnologies": ["tool1", "tool2"],
+            "expectedChallenges": ["challenge1", "challenge2"],
+            "learningResources": [
+              {
+                "title": "Resource title",
+                "type": "documentation|tutorial|course",
+                "url": "https://example.com"
+              }
+            ]
+          }
+        }
+        Don't use placeholder links like 'example.com' etc. Strictly follow the output format mentioned above.`;
+
+        const roadmapResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${mistralApiKey}`,
+          },
+          body: JSON.stringify({
+            model: 'mistral-medium',
+            messages: [
+              {
+                role: 'user',
+                content: roadmapPrompt,
+              },
+            ],
+            temperature: 0.7,
+          }),
+        });
+
+        if (!roadmapResponse.ok) {
+          console.error(`Roadmap generation error for idea "${idea.title}":`, await roadmapResponse.text());
+          continue; // Skip this idea but continue with others
+        }
+
+        const roadmapData = await roadmapResponse.json();
+        console.log('Roadmap API response:', roadmapData);
+
+        if (!roadmapData.choices?.[0]?.message?.content) {
+          console.error(`Invalid roadmap response for idea "${idea.title}"`);
+          continue; // Skip this idea but continue with others
+        }
+
+        const parsedRoadmap: RoadmapResponse = JSON.parse(roadmapData.choices[0].message.content);
+        console.log('Parsed roadmap:', parsedRoadmap);
+
+        if (!parsedRoadmap.roadmap) {
+          console.error(`Missing roadmap data for idea "${idea.title}"`);
+          continue; // Skip this idea but continue with others
+        }
+
+        // Add successful project to the collection
+        successfulProjects.push({
+          id: crypto.randomUUID(),
+          title: idea.title,
+          description: idea.description,
+          keywords: idea.keywords,
+          roadmap: parsedRoadmap.roadmap,
+          researchPapers: relatedPapers,
+        });
+        
         console.log(`Successfully processed idea: ${idea.title}`);
       } catch (error) {
+        // Log the error but continue processing other ideas
         console.error(`Error processing idea "${idea.title}":`, error);
         continue;
       }
     }
 
+    // Return successful projects, even if only some ideas were processed
     if (successfulProjects.length === 0) {
       throw new Error('No projects could be generated successfully');
     }
 
     return new Response(
-      JSON.stringify({ projects: successfulProjects }),
+      JSON.stringify({
+        projects: successfulProjects,
+      }),
       {
         headers: {
           ...corsHeaders,
@@ -274,7 +269,9 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({
+        error: error.message,
+      }),
       {
         status: 500,
         headers: {
